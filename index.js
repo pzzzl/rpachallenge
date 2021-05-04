@@ -4,43 +4,9 @@ const ExcelJS = require('exceljs')
 const {Builder, By, Key, until} = require('selenium-webdriver')
 
 var tasks = []
-
 driver = undefined
 
-function downloadSheet() {
-    return new Promise((resolve, reject) => {
-        const file = fs.createWriteStream("challenge.xlsx");
-        http.get("http://rpachallenge.com/assets/downloadFiles/challenge.xlsx", function(response) {
-            if(response) {
-                response.pipe(file)
-                resolve('Sheet downloaded succesfully')
-            } else {
-                reject("Couldn't download sheet")
-            }
-        })
-    })
-}
-
-function readExcel() {
-    return new Promise((resolve, reject) => {
-
-        var workbook = new ExcelJS.Workbook();
-        
-        workbook.xlsx.readFile('challenge.xlsx').then(function() {
-            var worksheet = workbook.getWorksheet('Sheet1')
-            worksheet.eachRow({ includeEmpty: false }, function(row, rowNumber) {
-                if(rowNumber != 1) {
-                    tasks.push(row.values)
-                }
-                resolve('Excel values loaded succesfully')
-            });
-        })
-        .catch(err => {
-            console.error(err)
-            reject("Couldn't read Excel properly")
-        })
-    })
-}
+main()
 
 async function main() {
     result = await downloadSheet()
@@ -75,6 +41,51 @@ async function main() {
     }
 }
 
+function downloadSheet() {
+
+    return new Promise((resolve, reject) => {
+
+        const file = fs.createWriteStream("challenge.xlsx")
+
+        http.get("http://rpachallenge.com/assets/downloadFiles/challenge.xlsx", function(response) {
+
+            if(response) {
+                response.pipe(file)
+                resolve('Sheet downloaded succesfully')
+            } else {
+                reject("Couldn't download sheet")
+            }
+
+        })
+    })
+
+}
+
+function readExcel() {
+    return new Promise((resolve, reject) => {
+
+        var workbook = new ExcelJS.Workbook()
+        
+        workbook.xlsx.readFile('challenge.xlsx').then(function() {
+
+            var worksheet = workbook.getWorksheet('Sheet1')
+
+            worksheet.eachRow({ includeEmpty: false }, function(row, rowNumber) {
+
+                if(rowNumber != 1) {
+                    tasks.push(row.values)
+                }
+
+                resolve('Excel values loaded succesfully')
+            })
+        })
+        .catch(err => {
+            console.error(err)
+            reject("Couldn't read Excel properly")
+        })
+    })
+}
+
 async function fillInput(prop, val) {
     await driver.wait(until.elementLocated(By.css(`input[ng-reflect-name=${prop}]`)), 10000).sendKeys(val)
 }
@@ -82,5 +93,3 @@ async function fillInput(prop, val) {
 async function submit() {
     await driver.executeScript("document.querySelector('input[value=Submit]').click()")
 }
-
-main()
