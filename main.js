@@ -20,5 +20,5 @@ const executeChallenge = require('./lib/executeChallenge');
     result = await executeChallenge(tasks);
     if(!result) return console.log("Couldn't finish challenge");
 
-    return console.log('Proccess finished succesfully!');
+    return console.log('Process finished succesfully!');
 })();
